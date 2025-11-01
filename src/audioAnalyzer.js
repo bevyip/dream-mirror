@@ -54,20 +54,20 @@ class AudioAnalyzer {
     this.analyser.getByteFrequencyData(this.dataArray);
 
     // PEAK DETECTION APPROACH - Focus on spikes rather than averages
-    // Filter for speech-range frequencies (human voice is roughly 85-255 Hz fundamental, 
+    // Filter for speech-range frequencies (human voice is roughly 85-255 Hz fundamental,
     // but harmonics extend much higher in the frequency spectrum)
-    
+
     // Find the highest peak (top 5% of frequency bins)
     const sortedData = [...this.dataArray].sort((a, b) => b - a);
     const topPercentile = Math.ceil(this.dataArray.length * 0.05); // Top 5%
     const peakFrequency = sortedData[0] || 0; // Absolute max
-    
+
     // Focus on upper range frequencies for speech (reduce low-frequency ambient noise sensitivity)
     // Human speech has energy across many frequency bins, so we look at top peaks
     const topPeaksAverage =
       sortedData.slice(0, topPercentile).reduce((a, b) => a + b, 0) /
       topPercentile;
-    
+
     // Additional filtering: ignore very low-frequency peaks (likely ambient noise/hum)
     // Speech typically doesn't have strong peaks below threshold
     const filteredPeak = peakFrequency > 20 ? peakFrequency : 0;
@@ -108,4 +108,3 @@ class AudioAnalyzer {
 }
 
 export default AudioAnalyzer;
-
