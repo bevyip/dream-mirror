@@ -19,10 +19,7 @@ Dream Mirror transforms spoken dream narratives into a dynamic, responsive visua
 
 ## Demo
 
-<video width="800" controls>
-  <source src="./public/poc-demo.mp4" type="video/mp4">
-  Your browser does not support the video tag. [Download the video](./public/poc-demo.mp4) instead.
-</video>
+[![Dream Mirror Demo](https://img.youtube.com/vi/HiEKv0wPgS8/maxresdefault.jpg)](https://youtu.be/HiEKv0wPgS8)
 
 ## Next Steps
 
