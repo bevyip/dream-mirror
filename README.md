@@ -19,7 +19,7 @@ Dream Mirror transforms spoken dream narratives into a dynamic, responsive visua
 
 ## Demo
 
-[![Dream Mirror Demo](https://img.youtube.com/vi/HiEKv0wPgS8/maxresdefault.jpg)](https://youtu.be/HiEKv0wPgS8)
+[![Dream Mirror Demo](https://img.youtube.com/vi/ij9ZdRIUd0U/maxresdefault.jpg)](https://youtu.be/ij9ZdRIUd0U)
 
 ## Next Steps
 
