@@ -1,33 +1,34 @@
 # Dream Mirror 🔮
 
-An interactive installation that visualizes dreams through real-time audio analysis and emotion-responsive visualization.
+An interactive installation that visualizes dreams through real-time audio analysis and audio-responsive visualization.
 
 ## Description
 
-Dream Mirror transforms spoken dream narratives into a dynamic, responsive visual experience. Users speak about their dreams into a microphone, and the system visualizes their emotional state through an animated orb that changes color, shape, and movement based on voice analysis.
+Dream Mirror transforms spoken dream narratives into a dynamic, responsive visual experience. Users speak about their dreams into a microphone, and the system visualizes their voice through animated torus geometries that change shape and movement based on audio intensity.
 
-## Current POC Features
+## Current Features
 
-- **3D Animated Orb**: Three.js-powered sphere with custom shaders for fluid deformation and wave patterns
-- **Real-time Audio Analysis**: Microphone input analysis with frequency detection and peak detection
-- **Audio-Responsive Visualization**: Orb reacts to speech with spikes and deformation based on audio peaks
-- **Manual Emotion Control**: Slider interface to adjust valence (-1 to 1) that controls orb color:
-  - Scary (dark red) → Negative (purple) → Neutral (blue) → Positive (gold) → Happy (bright gold)
-- **Waveform Visualization**: Real-time audio waveform display
-- **Interactive Camera**: OrbitControls for exploring the orb from any angle
-- **Color Mapping**: Smooth color interpolation based on emotional valence
-
-## Demo
-
-[![Dream Mirror Demo](https://img.youtube.com/vi/ij9ZdRIUd0U/maxresdefault.jpg)](https://youtu.be/ij9ZdRIUd0U)
+- **3D Animated Toruses**: Three.js-powered torus geometries with Simplex Noise for organic wave deformation
+- **Real-time Audio Analysis**: Microphone input analysis with frequency detection, peak detection, and intensity calculation
+- **Audio-Responsive Visualization**: Toruses react to speech with:
+  - Wave displacement that scales with audio intensity (non-linear curve for gradual response)
+  - Speed variation based on audio intensity
+  - Size scaling that grows with audio input
+  - Minimum intensity threshold (0.5) to filter quiet sounds
+- **Waveform Visualization**: Real-time audio waveform display with frequency bars
+- **Color System**: Siri-like multi-color palette (blues, teals, purples, pinks) with smooth color interpolation
+- **Modular Architecture**:
+  - `index.html` - Main HTML structure
+  - `script.js` - Main application logic (ES6 module)
+  - `src/audioAnalyzer.js` - Audio analysis class
+  - `src/style.css` - Styling
 
 ## Next Steps
 
 ### Sentient Audio Analysis
 
-- Implement intelligent audio analysis to dynamically adjust the currently manual emotion slider
+- Implement intelligent audio analysis to dynamically control visualization colors based on emotion
 - Extract emotional valence, arousal, and sentiment from voice in real-time
-- Replace manual slider with automatic emotion detection from audio signals
 - Integrate keyword-based sentiment analysis for dream content
 
 ### Panel Interpretation System
@@ -41,8 +42,8 @@ Dream Mirror transforms spoken dream narratives into a dynamic, responsive visua
 - **Projection Setup**: Transition from web app to projection-based installation
 - **Minimalist Interaction**: Single microphone as the only user interface element
 - **Spatial Design**:
-  - Orb projected onto a white wall
+  - Animated toruses projected onto a white wall
   - Interpretation panels/words appear against the same projection surface
   - Immersive, ambient experience where users interact only through voice
 
-The future vision is a room-scale installation where the orb and text interpretations are projected, creating an intimate space for dream sharing and reflection.
+The future vision is a room-scale installation where the animated toruses and text interpretations are projected, creating an intimate space for dream sharing and reflection.
