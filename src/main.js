@@ -272,107 +272,37 @@ class DreamGlobe {
     document.body.appendChild(bottomWrapper);
   }
 
-  setupAudioControls() {
-    // Create audio controls container
-    const audioContainer = document.createElement("div");
-    audioContainer.style.position = "absolute";
-    audioContainer.style.top = "20px";
-    audioContainer.style.left = "50%";
-    audioContainer.style.transform = "translateX(-50%)";
-    audioContainer.style.zIndex = "1000";
-    audioContainer.style.display = "flex";
-    audioContainer.style.gap = "10px";
-    audioContainer.style.alignItems = "center";
-
-    // Create microphone button
-    const micButton = document.createElement("button");
-    micButton.textContent = "🎤 Start Audio";
-    micButton.style.padding = "12px 24px";
-    micButton.style.fontSize = "16px";
-    micButton.style.fontWeight = "600";
-    micButton.style.color = "white";
-    micButton.style.backgroundColor = "#3b82f6";
-    micButton.style.border = "none";
-    micButton.style.borderRadius = "8px";
-    micButton.style.cursor = "pointer";
-    micButton.style.transition = "all 0.3s";
-    micButton.style.fontFamily = "Satoshi, sans-serif";
-
-    micButton.addEventListener("mouseenter", () => {
-      micButton.style.backgroundColor = "#2563eb";
-      micButton.style.transform = "scale(1.05)";
-    });
-
-    micButton.addEventListener("mouseleave", () => {
-      if (!this.audioAnalyzer.isListening) {
-        micButton.style.backgroundColor = "#3b82f6";
-      }
-      micButton.style.transform = "scale(1)";
-    });
-
-    // Audio waveform visualization
-    const waveformContainer = document.createElement("div");
-    waveformContainer.style.width = "200px";
-    waveformContainer.style.height = "40px";
-    waveformContainer.style.marginLeft = "15px";
-    waveformContainer.style.backgroundColor = "rgba(0, 0, 0, 0.3)";
-    waveformContainer.style.borderRadius = "8px";
-    waveformContainer.style.padding = "8px";
-    waveformContainer.style.display = "flex";
-    waveformContainer.style.alignItems = "center";
-    waveformContainer.style.justifyContent = "center";
-
-    const canvas = document.createElement("canvas");
-    canvas.width = 200;
-    canvas.height = 24;
-    canvas.style.width = "100%";
-    canvas.style.height = "100%";
-    canvas.style.display = "block";
-    waveformContainer.appendChild(canvas);
-
-    const ctx = canvas.getContext("2d");
-    this.waveformCanvas = canvas;
-    this.waveformContext = ctx;
-    this.waveformContainer = waveformContainer;
-
-    let isListening = false;
-
-    micButton.addEventListener("click", async () => {
-      if (!isListening) {
-        // Start listening
-        await this.startAudioListening();
-        if (this.audioAnalyzer.isListening) {
-          isListening = true;
-          micButton.textContent = "🔴 Stop Audio";
-          micButton.style.backgroundColor = "#ef4444";
-          waveformContainer.style.backgroundColor = "rgba(239, 68, 68, 0.2)"; // Red tint when active
-        }
-      } else {
-        // Stop listening
-        this.stopAudioListening();
-        isListening = false;
-        micButton.textContent = "🎤 Start Audio";
-        micButton.style.backgroundColor = "#3b82f6";
-        waveformContainer.style.backgroundColor = "rgba(0, 0, 0, 0.3)"; // Back to dark when inactive
-        // Clear waveform
-        if (this.waveformContext) {
-          this.waveformContext.clearRect(
-            0,
-            0,
-            this.waveformCanvas.width,
-            this.waveformCanvas.height
-          );
-        }
-      }
-    });
-
-    audioContainer.appendChild(micButton);
-    audioContainer.appendChild(waveformContainer);
-
-    document.body.appendChild(audioContainer);
+  setAudioLiveState(micGroup, toggle, isLive) {
+    micGroup.classList.toggle("is-live", isLive);
+    toggle.setAttribute("aria-checked", isLive ? "true" : "false");
+    toggle.setAttribute(
+      "aria-label",
+      isLive ? "Turn audio off" : "Turn audio on"
+    );
   }
 
-  drawWaveform() {
+  createAudioToggle() {
+    const toggle = document.createElement("button");
+    toggle.className = "audio-toggle";
+    toggle.type = "button";
+    toggle.setAttribute("role", "switch");
+    toggle.setAttribute("aria-checked", "false");
+    toggle.setAttribute("aria-label", "Turn audio on");
+
+    const track = document.createElement("span");
+    track.className = "audio-toggle-track";
+
+    const thumb = document.createElement("span");
+    thumb.className = "audio-toggle-thumb";
+    thumb.setAttribute("aria-hidden", "true");
+
+    track.appendChild(thumb);
+    toggle.appendChild(track);
+
+    return toggle;
+  }
+
+  drawWaveform(isLive = this.audioAnalyzer.isListening) {
     if (!this.waveformContext || !this.waveformCanvas) {
       return;
     }
@@ -383,62 +313,91 @@ class DreamGlobe {
     const height = canvas.height;
     const centerY = height / 2;
 
-    // Clear canvas
     ctx.clearRect(0, 0, width, height);
 
-    // Get frequency data if listening
-    if (
-      this.audioAnalyzer.isListening &&
-      this.audioAnalyzer.dataArray &&
-      this.audioAnalyzer.analyser
-    ) {
-      const dataArray = this.audioAnalyzer.dataArray;
-      this.audioAnalyzer.analyser.getByteFrequencyData(dataArray);
+    if (isLive && this.audioAnalyzer.isListening && this.audioAnalyzer.analyser) {
+      const timeData = new Uint8Array(this.audioAnalyzer.analyser.fftSize);
+      this.audioAnalyzer.analyser.getByteTimeDomainData(timeData);
 
-      // Draw frequency bars (audio visualization)
-      const barCount = 32; // Number of bars to display
-      const barWidth = width / barCount;
+      ctx.beginPath();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "#2eca45";
+      ctx.shadowBlur = 6;
+      ctx.shadowColor = "rgba(46, 202, 69, 0.75)";
 
-      ctx.fillStyle = "#3b82f6"; // Blue color when active
-      ctx.strokeStyle = "#60a5fa"; // Lighter blue for stroke
+      const sliceWidth = width / timeData.length;
+      let x = 0;
 
-      for (let i = 0; i < barCount; i++) {
-        // Sample frequency data (use every nth bin for bars)
-        const dataIndex = Math.floor((i / barCount) * dataArray.length);
-        const frequency = dataArray[dataIndex] || 0;
+      for (let i = 0; i < timeData.length; i++) {
+        const y = (timeData[i] / 128) * (height / 2);
 
-        // Normalize to 0-1 and scale to bar height
-        const normalized = frequency / 255;
-        const barHeight = normalized * (height * 0.9); // 90% of canvas height max
-
-        // Draw bar
-        const x = i * barWidth;
-        const barY = centerY - barHeight / 2;
-
-        // Draw filled bar
-        ctx.fillRect(x, barY, barWidth - 1, barHeight);
-
-        // Add glow effect for active bars
-        if (normalized > 0.3) {
-          ctx.shadowBlur = 5;
-          ctx.shadowColor = "#60a5fa";
-          ctx.fillRect(x, barY, barWidth - 1, barHeight);
-          ctx.shadowBlur = 0;
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
         }
+
+        x += sliceWidth;
       }
 
-      // Draw center line (baseline)
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
-      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    } else {
       ctx.beginPath();
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
       ctx.moveTo(0, centerY);
       ctx.lineTo(width, centerY);
       ctx.stroke();
-    } else {
-      // No audio - show idle state (flat line)
-      ctx.fillStyle = "rgba(107, 114, 128, 0.5)"; // Gray when inactive
-      ctx.fillRect(0, centerY - 2, width, 4);
     }
+  }
+
+  setupAudioControls() {
+    const audioContainer = document.createElement("div");
+    audioContainer.className = "audio-controls";
+
+    const micGroup = document.createElement("div");
+    micGroup.className = "audio-mic-group";
+
+    const toggle = this.createAudioToggle();
+
+    micGroup.appendChild(toggle);
+
+    const waveformContainer = document.createElement("div");
+    waveformContainer.className = "audio-waveform";
+
+    const canvas = document.createElement("canvas");
+    canvas.width = 200;
+    canvas.height = 24;
+    waveformContainer.appendChild(canvas);
+
+    const ctx = canvas.getContext("2d");
+    this.waveformCanvas = canvas;
+    this.waveformContext = ctx;
+    this.waveformContainer = waveformContainer;
+
+    let isListening = false;
+
+    toggle.addEventListener("click", async () => {
+      if (!isListening) {
+        await this.startAudioListening();
+        if (this.audioAnalyzer.isListening) {
+          isListening = true;
+          this.setAudioLiveState(micGroup, toggle, true);
+        }
+      } else {
+        this.stopAudioListening();
+        isListening = false;
+        this.setAudioLiveState(micGroup, toggle, false);
+        this.drawWaveform(false);
+      }
+    });
+
+    audioContainer.appendChild(micGroup);
+    audioContainer.appendChild(waveformContainer);
+
+    document.body.appendChild(audioContainer);
+    this.drawWaveform(false);
   }
 
   handleResize() {

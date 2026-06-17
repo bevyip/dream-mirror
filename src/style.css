@@ -127,3 +127,86 @@ body {
   border: none;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
+
+/* Audio controls — glass UI */
+.audio-controls {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.audio-mic-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.audio-toggle {
+  width: 52px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: "Satoshi", sans-serif;
+  flex-shrink: 0;
+}
+
+.audio-toggle-track {
+  position: relative;
+  display: block;
+  width: 52px;
+  height: 26px;
+  border-radius: 13px;
+  background-color: #39393d;
+  opacity: 1;
+  border: 0;
+  transition: background-color 500ms ease;
+}
+
+.audio-mic-group.is-live .audio-toggle-track {
+  background-color: #2eca45;
+}
+
+.audio-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 22px;
+  height: 22px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  background-color: #fff;
+  transition: transform 300ms ease;
+}
+
+.audio-mic-group.is-live .audio-toggle-thumb {
+  transform: translateX(26px);
+}
+
+.audio-toggle:focus-visible .audio-toggle-thumb {
+  background-color: #33cf4d;
+  box-shadow: 0 0 0 6px #fff;
+}
+
+.audio-waveform {
+  width: 200px;
+  height: 44px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.audio-waveform canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
